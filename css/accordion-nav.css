@@ -1,0 +1,56 @@
+/**
+ * MFS Accordion Navigation Styles
+ * Version: 1.0.0
+ */
+
+/* Hide all submenus by default */
+.wp-block-navigation__submenu-container {
+    display: none;
+}
+
+/* Show submenus when active or current */
+.wp-block-navigation__submenu-container.is-active,
+.wp-block-navigation-item.current-menu-item > .wp-block-navigation__submenu-container,
+.wp-block-navigation-item.current-menu-parent > .wp-block-navigation__submenu-container,
+.wp-block-navigation-item.current-menu-ancestor > .wp-block-navigation__submenu-container {
+    display: block;
+}
+
+/* Add indicator arrows for expandable items */
+.wp-block-navigation-item.has-child > .wp-block-navigation-item__content::after,
+.wp-block-navigation-item.has-child > a::after {
+    content: " ▸";
+    font-size: 0.8em;
+    margin-left: 5px;
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+
+/* Rotate arrow when open */
+.wp-block-navigation-item.has-child.is-open > .wp-block-navigation-item__content::after,
+.wp-block-navigation-item.has-child.is-open > a::after {
+    content: " ▾";
+    transform: rotate(0deg);
+}
+
+/* Smooth transitions for submenu appearance */
+.wp-block-navigation__submenu-container {
+    transition: all 0.3s ease;
+}
+
+/* Optional: Add some indentation for better hierarchy visibility */
+.wp-block-navigation__submenu-container .wp-block-navigation-item {
+    padding-left: 15px;
+}
+
+/* Optional: Hover effect for interactive feedback */
+.wp-block-navigation-item.has-child > a:hover::after,
+.wp-block-navigation-item.has-child > .wp-block-navigation-item__content:hover::after {
+    opacity: 0.7;
+}
+
+/* Ensure clickable area for accordion functionality */
+.wp-block-navigation-item.has-child > a,
+.wp-block-navigation-item.has-child > .wp-block-navigation-item__content {
+    cursor: pointer;
+}
