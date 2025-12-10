@@ -3,7 +3,7 @@
  * Plugin Name: MFS Accordion Navigation
  * Plugin URI: https://myfutureself.digital
  * Description: Adds accordion functionality to WordPress navigation blocks for My Future Self Digital
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: MisterT9007
  * Author URI: https://myfutureself.digital
  * License: GPL v2 or later
@@ -24,7 +24,7 @@ class MFS_Accordion_Navigation {
     /**
      * Plugin version
      */
-    const VERSION = '1.1.0';
+    const VERSION = '1.2.0';
     
     /**
      * Constructor
@@ -46,12 +46,14 @@ class MFS_Accordion_Navigation {
         <style id="mfs-accordion-nav-css">
         /**
          * MFS Accordion Navigation Styles
-         * Version: 1.1.0
+         * Version: 1.2.0
          */
 
         /* Hide all submenus by default */
         .wp-block-navigation__submenu-container,
-        .wp-block-navigation-item .wp-block-navigation__submenu-container {
+        .wp-block-navigation-item .wp-block-navigation__submenu-container,
+        .wp-block-pages-list__item .wp-block-navigation__submenu-container,
+        li.has-child > ul {
             display: none !important;
         }
 
@@ -59,7 +61,11 @@ class MFS_Accordion_Navigation {
         .wp-block-navigation__submenu-container.is-active,
         .wp-block-navigation-item.current-menu-item > .wp-block-navigation__submenu-container,
         .wp-block-navigation-item.current-menu-parent > .wp-block-navigation__submenu-container,
-        .wp-block-navigation-item.current-menu-ancestor > .wp-block-navigation__submenu-container {
+        .wp-block-navigation-item.current-menu-ancestor > .wp-block-navigation__submenu-container,
+        .wp-block-pages-list__item.current-menu-item > .wp-block-navigation__submenu-container,
+        .wp-block-pages-list__item.current-menu-parent > .wp-block-navigation__submenu-container,
+        .wp-block-pages-list__item.current-menu-ancestor > .wp-block-navigation__submenu-container,
+        li.has-child.is-open > ul {
             display: block !important;
         }
 
@@ -67,7 +73,9 @@ class MFS_Accordion_Navigation {
         .wp-block-navigation-item.has-child > .wp-block-navigation-item__content::after,
         .wp-block-navigation-item.has-child > a::after,
         .wp-block-navigation-item.wp-block-navigation-submenu > .wp-block-navigation-item__content::after,
-        .wp-block-navigation-item.wp-block-navigation-submenu > a::after {
+        .wp-block-navigation-item.wp-block-navigation-submenu > a::after,
+        .wp-block-pages-list__item.has-child > a::after,
+        li.has-child > a::after {
             content: " ▸";
             font-size: 0.8em;
             margin-left: 5px;
@@ -79,7 +87,9 @@ class MFS_Accordion_Navigation {
         .wp-block-navigation-item.has-child.is-open > .wp-block-navigation-item__content::after,
         .wp-block-navigation-item.has-child.is-open > a::after,
         .wp-block-navigation-item.wp-block-navigation-submenu.is-open > .wp-block-navigation-item__content::after,
-        .wp-block-navigation-item.wp-block-navigation-submenu.is-open > a::after {
+        .wp-block-navigation-item.wp-block-navigation-submenu.is-open > a::after,
+        .wp-block-pages-list__item.has-child.is-open > a::after,
+        li.has-child.is-open > a::after {
             content: " ▾";
             transform: rotate(0deg);
         }
@@ -98,7 +108,9 @@ class MFS_Accordion_Navigation {
         .wp-block-navigation-item.has-child > a:hover::after,
         .wp-block-navigation-item.has-child > .wp-block-navigation-item__content:hover::after,
         .wp-block-navigation-item.wp-block-navigation-submenu > a:hover::after,
-        .wp-block-navigation-item.wp-block-navigation-submenu > .wp-block-navigation-item__content:hover::after {
+        .wp-block-navigation-item.wp-block-navigation-submenu > .wp-block-navigation-item__content:hover::after,
+        .wp-block-pages-list__item.has-child > a:hover::after,
+        li.has-child > a:hover::after {
             opacity: 0.7;
         }
 
@@ -106,7 +118,9 @@ class MFS_Accordion_Navigation {
         .wp-block-navigation-item.has-child > a,
         .wp-block-navigation-item.has-child > .wp-block-navigation-item__content,
         .wp-block-navigation-item.wp-block-navigation-submenu > a,
-        .wp-block-navigation-item.wp-block-navigation-submenu > .wp-block-navigation-item__content {
+        .wp-block-navigation-item.wp-block-navigation-submenu > .wp-block-navigation-item__content,
+        .wp-block-pages-list__item.has-child > a,
+        li.has-child > a {
             cursor: pointer;
         }
         </style>
@@ -121,7 +135,7 @@ class MFS_Accordion_Navigation {
         <script id="mfs-accordion-nav-js">
         /**
          * MFS Accordion Navigation JavaScript
-         * Version: 1.1.0
+         * Version: 1.2.0
          */
 
         (function() {
@@ -136,10 +150,13 @@ class MFS_Accordion_Navigation {
                 console.log('MFS Accordion Navigation: Starting initialization');
                 
                 // Find all navigation items with submenus - try multiple selectors
+                // Support both Navigation block and Pages List block
                 const navItems = document.querySelectorAll(
                     '.wp-block-navigation-item.has-child, ' +
                     '.wp-block-navigation-item.wp-block-navigation-submenu, ' +
-                    '.wp-block-navigation-submenu'
+                    '.wp-block-navigation-submenu, ' +
+                    '.wp-block-pages-list__item.has-child, ' +
+                    'li.has-child'
                 );
                 
                 console.log('MFS Accordion Navigation: Found ' + navItems.length + ' items with submenus');
