@@ -3,7 +3,7 @@
  * Plugin Name: MFS Accordion Navigation
  * Plugin URI: https://myfutureself.digital
  * Description: Adds accordion functionality to WordPress navigation blocks for My Future Self Digital
- * Version: 1.2.0
+ * Version: 1.3.0
  * Author: MisterT9007
  * Author URI: https://myfutureself.digital
  * License: GPL v2 or later
@@ -24,7 +24,7 @@ class MFS_Accordion_Navigation {
     /**
      * Plugin version
      */
-    const VERSION = '1.2.0';
+    const VERSION = '1.3.0';
     
     /**
      * Constructor
@@ -42,12 +42,39 @@ class MFS_Accordion_Navigation {
      * Add inline CSS directly to head
      */
     public function add_inline_css() {
+        $is_logged_in = is_user_logged_in();
+        
+        // Add body class for easier CSS targeting
+        add_filter('body_class', function($classes) use ($is_logged_in) {
+            if (!$is_logged_in) {
+                $classes[] = 'mfs-logged-out';
+            } else {
+                $classes[] = 'mfs-logged-in';
+            }
+            return $classes;
+        });
         ?>
         <style id="mfs-accordion-nav-css">
         /**
          * MFS Accordion Navigation Styles
-         * Version: 1.2.0
+         * Version: 1.3.0
          */
+
+        <?php if (!$is_logged_in): ?>
+        /* For logged-out users: Hide all navigation items by default */
+        body.mfs-logged-out .wp-block-navigation ul li,
+        body.mfs-logged-out .wp-block-page-list > li,
+        body.mfs-logged-out .wp-block-pages-list__item {
+            display: none !important;
+        }
+        
+        /* Show specific items using data attributes (will be added via JS) */
+        body.mfs-logged-out .wp-block-pages-list__item.mfs-show,
+        body.mfs-logged-out .wp-block-page-list > li.mfs-show,
+        body.mfs-logged-out .wp-block-navigation ul li.mfs-show {
+            display: list-item !important;
+        }
+        <?php endif; ?>
 
         /* Hide all submenus by default */
         .wp-block-navigation__submenu-container,
@@ -131,17 +158,57 @@ class MFS_Accordion_Navigation {
      * Add inline JavaScript directly to footer
      */
     public function add_inline_js() {
+        $is_logged_in = is_user_logged_in();
         ?>
         <script id="mfs-accordion-nav-js">
         /**
          * MFS Accordion Navigation JavaScript
-         * Version: 1.2.0
+         * Version: 1.3.0
          */
 
         (function() {
             'use strict';
             
             console.log('MFS Accordion Navigation: Initializing...');
+            
+            <?php if (!$is_logged_in): ?>
+            // For logged-out users, show only specific menu items
+            console.log('MFS Accordion Navigation: User is logged out, filtering menu items');
+            
+            // Find all navigation items
+            const allNavItems = document.querySelectorAll(
+                '.wp-block-pages-list__item, ' +
+                '.wp-block-page-list > li, ' +
+                '.wp-block-navigation ul li'
+            );
+            
+            allNavItems.forEach(function(item) {
+                const link = item.querySelector('a');
+                if (!link) return;
+                
+                const href = link.getAttribute('href') || '';
+                const text = link.textContent.toLowerCase().trim();
+                
+                // Show these specific items
+                if (
+                    text.includes('about my future self') ||
+                    text === 'about my future self digital' ||
+                    href.includes('/about') ||
+                    text === 'login' ||
+                    href.includes('/login') ||
+                    href === window.location.origin + '/' ||
+                    href === window.location.origin ||
+                    text === 'home' ||
+                    text === 'homepage' ||
+                    item.classList.contains('current-menu-item') // Current page
+                ) {
+                    item.classList.add('mfs-show');
+                    console.log('MFS Accordion Navigation: Showing item - ' + text);
+                }
+            });
+            
+            return; // Don't initialize accordion for logged-out users
+            <?php endif; ?>
             
             /**
              * Initialize accordion navigation
